@@ -7,10 +7,14 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\TempImageController;
 
 // Public Routes
 Route::post('/admin/login', [AuthController::class, 'authenticate']);
 Route::get('/sizes', [SizeController::class, 'index']);
+
+// Temp Image upload (public)
+Route::post('/temp-images', [TempImageController::class, 'store']);
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -33,7 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Product CRUD Routes (resource)
     Route::resource('products', ProductController::class);
 
-
+    // Update a product
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    // Delete a product
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
 });
 
