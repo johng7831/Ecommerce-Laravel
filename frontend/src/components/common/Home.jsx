@@ -3,6 +3,7 @@ import './Shop.css'
 import Layout from './Layout'
 import Hero from './Hero'
 import LatestProduct from './LatestProduct'
+import FeaturedProduct from './FeaturedProduct'
 
 const Home = () => {
   return (
@@ -10,6 +11,7 @@ const Home = () => {
       <div className="home-page">
         <Hero/> 
         <LatestProduct/>
+        <FeaturedProduct/>
       </div>
     </Layout>
   )

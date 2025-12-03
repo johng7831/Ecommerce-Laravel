@@ -8,10 +8,13 @@ use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\TempImageController;
+use App\Http\Controllers\front\ProductController as FrontProductController;
 
 // Public Routes
 Route::post('/admin/login', [AuthController::class, 'authenticate']);
 Route::get('/sizes', [SizeController::class, 'index']);
+Route::get('/latest-products', [FrontProductController::class, 'latestProducts']);
+Route::get('/featured-products', [FrontProductController::class, 'featuredProduct']);
 
 // Temp Image upload (public)
 Route::post('/temp-images', [TempImageController::class, 'store']);

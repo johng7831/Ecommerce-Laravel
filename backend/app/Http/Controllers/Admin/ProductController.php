@@ -8,18 +8,31 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\Tempimages;
 use App\Models\ProductImage;
+use App\Models\ProductSize;
 
 class ProductController extends Controller
 {
     // Return all products
     public function index()
     {
-        $product = Product::orderBy('created_at', 'DESC')->get();
+        try {
+            $products = Product::orderBy('created_at', 'DESC')->get();
+            
+            // Ensure we return an array, not a collection issue
+            $productsArray = $products->toArray();
 
-        return response()->json([
-            'status' => 200,
-            'data'   => $product
-        ]);
+            return response()->json([
+                'status' => 200,
+                'data'   => $productsArray,
+                'count'  => count($productsArray)
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error fetching products: ' . $e->getMessage(),
+                'data' => []
+            ], 600);
+        }
     }
 
     // Store a new product
@@ -36,7 +49,9 @@ class ProductController extends Controller
             'is_featured'       => 'required|in:yes,no',
             'status'            => 'required|in:0,1',
             'gallery'           => 'array',
-            'gallery.*'         => 'integer'
+            'gallery.*'         => 'integer',
+            'sizes'             => 'array',
+            'sizes.*'           => 'integer'
         ]);
 
         if ($validator->fails()) {
@@ -47,19 +62,34 @@ class ProductController extends Controller
         }
 
         // Create product
-        $product = new Product();
-        $product->title             = $request->title;
-        $product->price             = $request->price;
-        $product->compare_price     = $request->compare_price;
-        $product->category_id       = $request->category;
-        $product->brand_id          = $request->brand;
-        $product->sku               = $request->sku;
-        $product->qty               = $request->qty;
-        $product->description       = $request->description;
-        $product->short_description = $request->short_description;
-        $product->is_featured       = $request->is_featured;
-        $product->status            = $request->status;
-        $product->save();
+        try {
+            $product = new Product();
+            $product->title             = $request->title;
+            $product->price             = $request->price;
+            $product->compare_price     = $request->compare_price;
+            $product->category_id       = $request->category;
+            $product->brand_id          = $request->brand;
+            $product->sku               = $request->sku;
+            $product->qty               = $request->qty;
+            $product->description       = $request->description;
+            $product->short_description = $request->short_description;
+            $product->is_featured       = $request->is_featured;
+            $product->status            = $request->status;
+            
+            if (!$product->save()) {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Failed to save product',
+                    'errors' => ['Failed to create product in database']
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error creating product: ' . $e->getMessage(),
+                'errors' => [$e->getMessage()]
+            ], 500);
+        }
 
         // Save product images
         if (!empty($request->gallery)) {
@@ -111,11 +141,28 @@ class ProductController extends Controller
             }
         }
 
+        // Save product sizes
+        if (!empty($request->sizes) && is_array($request->sizes)) {
+            // Delete existing sizes
+            ProductSize::where('product_id', $product->id)->delete();
+            
+            // Attach new sizes
+            foreach ($request->sizes as $sizeId) {
+                ProductSize::create([
+                    'product_id' => $product->id,
+                    'size_id' => $sizeId
+                ]);
+            }
+        }
+
+        // Refresh product to get latest data
+        $product->refresh();
+
         return response()->json([
-            'status'  => true,
+            'status'  => 200,
             'message' => 'Product created successfully',
-            'product' => $product
-        ]);
+            'data'    => $product
+        ], 200);
     }
 
     // Return single product
@@ -157,7 +204,9 @@ class ProductController extends Controller
             'sku'               => 'required|string|max:255|unique:products,sku,' . $id,
             'qty'               => 'required|integer',
             'is_featured'       => 'required|in:yes,no',
-            'status'            => 'required|in:0,1'
+            'status'            => 'required|in:0,1',
+            'sizes'             => 'array',
+            'sizes.*'           => 'integer'
         ]);
 
         if ($validator->fails()) {
@@ -180,6 +229,20 @@ class ProductController extends Controller
         $product->is_featured       = $request->is_featured;
         $product->status            = $request->status;
         $product->save();
+
+        // Update product sizes
+        if (isset($request->sizes) && is_array($request->sizes)) {
+            // Delete existing sizes
+            ProductSize::where('product_id', $product->id)->delete();
+            
+            // Attach new sizes
+            foreach ($request->sizes as $sizeId) {
+                ProductSize::create([
+                    'product_id' => $product->id,
+                    'size_id' => $sizeId
+                ]);
+            }
+        }
 
         return response()->json([
             'status'  => true,

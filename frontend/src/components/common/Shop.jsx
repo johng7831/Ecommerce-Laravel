@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from './Layout'
+import FeaturedProduct from './FeaturedProduct'
 import './Shop.css'
 import classicTShirt from '../../assets/classic-t-shirt.png'
 import runningShoes from '../../assets/running-shoes.webp'
@@ -209,6 +210,7 @@ const Shop = () => {
             )}
           </main>
         </div>
+        <FeaturedProduct />
       </div>
     </Layout>
   )

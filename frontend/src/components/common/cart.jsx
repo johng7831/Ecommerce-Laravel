@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from './Layout'
+import FeaturedProduct from './FeaturedProduct'
 import { useCart } from '../../context/CartContext'
 import './Shop.css'
 
@@ -28,6 +29,7 @@ const Cart = () => {
             </div>
           </div>
         </div>
+        <FeaturedProduct />
       </Layout>
     )
   }
@@ -71,6 +73,7 @@ const Cart = () => {
             </div>
           </div>
         </div>
+        <FeaturedProduct />
       </div>
     </Layout>
   )

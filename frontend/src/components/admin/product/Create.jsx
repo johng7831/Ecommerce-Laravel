@@ -20,6 +20,8 @@ const CreateProduct = () => {
   });
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [sizes, setSizes] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +30,7 @@ const CreateProduct = () => {
   useEffect(() => {
     fetchCategories();
     fetchBrands();
+    fetchSizes();
   }, []);
 
   const fetchCategories = async () => {
@@ -75,6 +78,24 @@ const CreateProduct = () => {
       }
     } catch (err) {
       console.error("Error fetching brands:", err);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/sizes", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      if (data.status === 200) {
+        setSizes(data.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching sizes:", err);
     }
   };
 
@@ -140,6 +161,7 @@ const CreateProduct = () => {
         qty: parseInt(formData.qty),
         status: parseInt(formData.status),
         gallery: gallery.map((img) => img.id),
+        sizes: selectedSizes.map((sizeId) => parseInt(sizeId)),
       };
 
       const response = await fetch("http://localhost:8000/api/products", {
@@ -287,6 +309,52 @@ const CreateProduct = () => {
                 placeholder="0"
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="sizes">Sizes</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
+              {sizes.map((size) => (
+                <label
+                  key={size.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    cursor: "pointer",
+                    padding: "0.5rem 1rem",
+                    border: selectedSizes.includes(size.id.toString())
+                      ? "2px solid #3b82f6"
+                      : "2px solid #e5e7eb",
+                    borderRadius: "4px",
+                    backgroundColor: selectedSizes.includes(size.id.toString())
+                      ? "#eff6ff"
+                      : "white",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedSizes.includes(size.id.toString())}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedSizes([...selectedSizes, size.id.toString()]);
+                      } else {
+                        setSelectedSizes(
+                          selectedSizes.filter((id) => id !== size.id.toString())
+                        );
+                      }
+                    }}
+                    style={{ cursor: "pointer" }}
+                  />
+                  <span>{size.name}</span>
+                </label>
+              ))}
+            </div>
+            {sizes.length === 0 && (
+              <p style={{ color: "#6b7280", fontSize: "0.875rem", marginTop: "0.5rem" }}>
+                No sizes available. Please add sizes first.
+              </p>
+            )}
           </div>
 
           <div className="form-group">

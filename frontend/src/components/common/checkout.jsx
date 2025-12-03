@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from './Layout'
+import FeaturedProduct from './FeaturedProduct'
 import { useCart } from '../../context/CartContext'
 import './Shop.css'
 
@@ -50,6 +51,7 @@ const Checkout = () => {
             </div>
           </div>
         </div>
+        <FeaturedProduct />
       </Layout>
     )
   }
@@ -204,6 +206,7 @@ const Checkout = () => {
             </div>
           </div>
         </div>
+        <FeaturedProduct />
       </div>
     </Layout>
   )

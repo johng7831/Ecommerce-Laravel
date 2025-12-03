@@ -2,23 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../../utils/api'
 
-const LatestProduct = () => {
+const FeaturedProduct = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLatestProducts();
+    fetchFeaturedProducts();
   }, []);
 
-  const fetchLatestProducts = async () => {
+  const fetchFeaturedProducts = async () => {
     try {
-      const response = await api.get('/latest-products');
+      const response = await api.get('/featured-products');
       
       if (response.data.status === 200) {
         setProducts(response.data.data || []);
       }
     } catch (err) {
-      console.error('Error fetching latest products:', err);
+      console.error('Error fetching featured products:', err);
     } finally {
       setLoading(false);
     }
@@ -40,17 +40,17 @@ const LatestProduct = () => {
   }
 
   return (
-    <section className="latest-products" aria-label="Latest products">
+    <section className="featured-products" aria-label="Featured products">
       <div className="section-header">
-        <h2 className="section-title">New Arrivals</h2>
+        <h2 className="section-title">Featured Products</h2>
         <Link to="/shop" className="section-cta">View all</Link>
       </div>
       {loading ? (
-        <div className="loading-state">Loading products...</div>
+        <div style={{ textAlign: 'center', padding: '2rem' }}>Loading products...</div>
       ) : (
-        <div className="product-grid latest-product-grid">
+        <div className="product-grid">
           {products.map((p) => (
-            <article key={p.id} className="product-card latest-product-card">
+            <article key={p.id} className="product-card">
               <Link to={`/product/${p.id}`} className="product-image-wrap">
                 <img 
                   src={getProductImage(p)} 
@@ -68,7 +68,7 @@ const LatestProduct = () => {
                 <div className="product-price-container">
                   <span className="product-price">${parseFloat(p.price).toFixed(2)}</span>
                   {p.compare_price && (
-                    <span className="product-compare-price">
+                    <span className="product-compare-price" style={{ textDecoration: 'line-through', color: '#6b7280', marginLeft: '0.5rem' }}>
                       ${parseFloat(p.compare_price).toFixed(2)}
                     </span>
                   )}
@@ -82,9 +82,5 @@ const LatestProduct = () => {
   )
 }
 
-export default LatestProduct
-
-
-
-
+export default FeaturedProduct
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import AdminLayout from "../AdminLayout";
 import "../Admin.css";
 
@@ -7,10 +7,11 @@ const ShowProduct = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const location = useLocation();
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [location.pathname]);
 
   const fetchProducts = async () => {
     try {
@@ -36,11 +37,15 @@ const ShowProduct = () => {
 
       const payload = await response.json().catch(() => ({}));
 
-      if (!response.ok || payload.status !== 200) {
+      if (!response.ok) {
         throw new Error(payload.message || "Failed to fetch products");
       }
 
-      setProducts(payload.data || []);
+      if (payload.status === 200 && payload.data) {
+        setProducts(Array.isArray(payload.data) ? payload.data : []);
+      } else {
+        setProducts([]);
+      }
     } catch (err) {
       setError(err.message || "Failed to fetch products");
     } finally {
@@ -95,9 +100,19 @@ const ShowProduct = () => {
             </p>
             <h1 className="categories-title">Products</h1>
           </div>
-          <Link to="/admin/products/create" className="add-category-btn">
-            Add Product
-          </Link>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <button
+              onClick={fetchProducts}
+              className="add-category-btn"
+              style={{ backgroundColor: "#6b7280" }}
+              disabled={loading}
+            >
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
+            <Link to="/admin/products/create" className="add-category-btn">
+              Add Product
+            </Link>
+          </div>
         </div>
 
         {loading && (
