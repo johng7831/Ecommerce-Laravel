@@ -1,12 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { AdminAuthProvider } from './context/AdminAuth'
+import { CustomerAuthProvider } from './context/CustomerAuth'
 import Home from './components/common/Home.jsx'
 import Shop from './components/common/Shop.jsx'
 import Product from './components/common/product.jsx'
 import Cart from './components/common/cart.jsx'
 import Checkout from './components/common/checkout.jsx'
 import Login from './components/common/Login.jsx'
+import Register from './components/common/Register.jsx'
+import CustomerLogin from './components/common/CustomerLogin.jsx'
+import AccountDashboard from './components/common/AccountDashboard.jsx'
 import Dashboard from './components/admin/Dashboard.jsx'
 import AdminRequireAuth from './components/common/AdminRequireAuth.jsx'
 import { default as ShowCategory } from './components/admin/category/Show.jsx'
@@ -22,15 +26,19 @@ import EditProduct from './components/admin/product/Edit.jsx'
 function App() {
   return (
     <CartProvider>
-      <AdminAuthProvider>
-        <BrowserRouter> 
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/shop' element={<Shop />} />
-            <Route path='/product/:id' element={<Product />} />
-            <Route path='/cart' element={<Cart />} />
-            <Route path='/checkout' element={<Checkout />} />
-            <Route path='/admin/login' element={<Login />} />
+      <CustomerAuthProvider>
+        <AdminAuthProvider>
+          <BrowserRouter> 
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/shop' element={<Shop />} />
+              <Route path='/product/:id' element={<Product />} />
+              <Route path='/cart' element={<Cart />} />
+              <Route path='/checkout' element={<Checkout />} />
+              <Route path='/register' element={<Register />} />
+              <Route path='/login' element={<CustomerLogin />} />
+              <Route path='/account/dashboard' element={<AccountDashboard />} />
+              <Route path='/admin/login' element={<Login />} />
 
 
             <Route path='/admin/dashboard' element={
@@ -89,8 +97,9 @@ function App() {
           </Routes>
    
 
-        </BrowserRouter>
-      </AdminAuthProvider>
+          </BrowserRouter>
+        </AdminAuthProvider>
+      </CustomerAuthProvider>
     </CartProvider>
   )
 }

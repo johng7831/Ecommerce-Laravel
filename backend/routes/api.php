@@ -9,12 +9,21 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\TempImageController;
 use App\Http\Controllers\front\ProductController as FrontProductController;
+use App\Http\Controllers\front\AccountController;
 
 // Public Routes
 Route::post('/admin/login', [AuthController::class, 'authenticate']);
 Route::get('/sizes', [SizeController::class, 'index']);
 Route::get('/latest-products', [FrontProductController::class, 'latestProducts']);
 Route::get('/featured-products', [FrontProductController::class, 'featuredProduct']);
+Route::get('/brands', [BrandController::class, 'index']);
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{id}', [ProductController::class, 'show']);   
+Route::post('/register', [AccountController::class, 'register']);
+Route::post('/login', [AccountController::class, 'authenticate']);
+
+
 
 // Temp Image upload (public)
 Route::post('/temp-images', [TempImageController::class, 'store']);

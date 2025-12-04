@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from './Layout'
 import FeaturedProduct from './FeaturedProduct'
 import { useCart } from '../../context/CartContext'
+import { CustomerAuthContext } from '../../context/CustomerAuth'
 import './Shop.css'
 
 const Checkout = () => {
   const navigate = useNavigate()
   const { cartItems, getCartTotal, clearCart } = useCart()
+  const { user } = useContext(CustomerAuthContext)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,6 +20,19 @@ const Checkout = () => {
     phone: ''
   })
   const [paymentMethod, setPaymentMethod] = useState('cod')
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login?redirect=/checkout')
+    } else {
+      // Pre-fill form with user data
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || ''
+      }))
+    }
+  }, [user, navigate])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -35,6 +50,10 @@ const Checkout = () => {
     clearCart()
     // Navigate to a success page or home
     navigate('/')
+  }
+
+  if (!user) {
+    return null // Will redirect in useEffect
   }
 
   if (cartItems.length === 0) {

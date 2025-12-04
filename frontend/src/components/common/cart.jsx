@@ -1,17 +1,23 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from './Layout'
 import FeaturedProduct from './FeaturedProduct'
 import { useCart } from '../../context/CartContext'
+import { CustomerAuthContext } from '../../context/CustomerAuth'
 import './Shop.css'
 
 const Cart = () => {
   const navigate = useNavigate()
   const { cartItems, removeFromCart, getCartTotal } = useCart()
+  const { user } = useContext(CustomerAuthContext)
 
   const handleProceedToCheckout = () => {
     if (cartItems.length > 0) {
-      navigate('/checkout')
+      if (user) {
+        navigate('/checkout')
+      } else {
+        navigate('/login?redirect=/checkout')
+      }
     }
   }
 
