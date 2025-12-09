@@ -516,3 +516,15 @@
   color: #6366f1;
   margin: 4px 0 0 0;
 }
+
+.order-status-pending {
+  color: #92400e;
+}
+
+.order-status-delivered {
+  color: #065f46;
+}
+
+.order-status-shipped {
+  color: #1e40af;
+}

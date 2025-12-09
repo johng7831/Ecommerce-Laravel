@@ -87,25 +87,47 @@ class AccountController extends Controller
     }
 
     // ======================
-    // Get Order Details
+    // Get All User Orders
     // ======================
-    public function getOrdersdetail(Request $request)
+    public function getOrders()
     {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'order_id' => 'required|exists:orders,id',
-        ]);
-
-        if ($validator->fails()) {
+        $user = auth()->user();
+        
+        if (!$user) {
             return response()->json([
-                'status' => 400,
-                'errors' => $validator->errors(),
-            ], 400);
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
         }
 
-        $order = Order::where('user_id', $request->user_id)
-            ->where('id', $request->order_id)
-            ->with('items') // if you have relation
+        $orders = Order::where('user_id', $user->id)
+            ->with('orderItems')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 200,
+            'data' => $orders,
+        ], 200);
+    }
+
+    // ======================
+    // Get Order Details
+    // ======================
+    public function getOrdersdetail($id)
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $order = Order::where('user_id', $user->id)
+            ->where('id', $id)
+            ->with('orderItems')
             ->first();
 
         if (!$order) {

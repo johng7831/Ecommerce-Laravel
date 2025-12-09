@@ -23,12 +23,7 @@ class Order extends Model
         'zip',
         'phone',
         'email',
-<<<<<<< HEAD
         'name'
-=======
-        'name',
-        'total'
->>>>>>> e22b441 (Initial project commit)
     ];
 
     public function orderItems()
@@ -36,14 +31,6 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-<<<<<<< HEAD
-=======
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
->>>>>>> e22b441 (Initial project commit)
     public function user()
     {
         return $this->belongsTo(User::class);

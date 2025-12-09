@@ -1,17 +1,67 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CustomerAuthContext } from '../../context/CustomerAuth'
 import Layout from './Layout'
+import api from '../../utils/api'
 import './Auth.css'
 
 const AccountDashboard = () => {
   const { user, logout } = useContext(CustomerAuthContext)
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('account')
+  const [orders, setOrders] = useState([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+  const [ordersError, setOrdersError] = useState(null)
 
   const handleLogout = () => {
     logout()
     navigate('/')
+  }
+
+  useEffect(() => {
+    if (activeTab === 'orders' && user) {
+      fetchOrders()
+    }
+  }, [activeTab, user])
+
+  const fetchOrders = async () => {
+    try {
+      setOrdersLoading(true)
+      setOrdersError(null)
+      const response = await api.get('/user/orders')
+      if (response.data && response.data.status === 200) {
+        setOrders(response.data.data || [])
+      } else {
+        setOrdersError('Failed to load orders')
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err)
+      setOrdersError('Failed to load orders')
+    } finally {
+      setOrdersLoading(false)
+    }
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+
+  const getStatusClass = (status) => {
+    const statusLower = status?.toLowerCase() || ''
+    if (statusLower === 'pending') return 'order-status-pending'
+    if (statusLower === 'completed' || statusLower === 'delivered') return 'order-status-delivered'
+    if (statusLower === 'processing' || statusLower === 'shipped') return 'order-status-shipped'
+    return 'order-status-pending'
+  }
+
+  const handleOrderClick = (orderId) => {
+    navigate(`/order/confirmed/${orderId}`)
   }
 
   if (!user) {
@@ -111,38 +161,63 @@ const AccountDashboard = () => {
                     <h2>My Orders</h2>
                   </div>
                   <div className="dashboard-card-body">
-                    <div className="orders-grid">
-                      <div className="order-card">
-                        <div className="order-image">
-                          <img src="https://via.placeholder.com/150" alt="Order Product" />
-                        </div>
-                        <div className="order-info">
-                          <h3 className="order-title">Order #12345</h3>
-                          <p className="order-date">Placed on Jan 15, 2024</p>
-                          <p className="order-status">Delivered</p>
-                        </div>
+                    {ordersLoading && (
+                      <p style={{ textAlign: 'center', padding: '20px' }}>Loading orders...</p>
+                    )}
+                    {ordersError && (
+                      <p style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                        {ordersError}
+                      </p>
+                    )}
+                    {!ordersLoading && !ordersError && orders.length === 0 && (
+                      <p style={{ textAlign: 'center', padding: '20px' }}>No orders found.</p>
+                    )}
+                    {!ordersLoading && !ordersError && orders.length > 0 && (
+                      <div className="orders-grid">
+                        {orders.map((order) => {
+                          const orderItems = order.order_items || order.orderItems || []
+                          const firstItem = orderItems[0]
+                          const imageUrl = firstItem?.image
+                            ? `http://localhost:8000/upload/products/${firstItem.image}`
+                            : 'https://via.placeholder.com/150'
+                          
+                          return (
+                            <div
+                              key={order.id}
+                              className="order-card"
+                              onClick={() => handleOrderClick(order.id)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <div className="order-image">
+                                <img
+                                  src={imageUrl}
+                                  alt={firstItem?.name || 'Order Product'}
+                                  onError={(e) => {
+                                    if (firstItem?.image) {
+                                      e.target.src = `http://localhost:8000/upload/products/thumb_${firstItem.image}`
+                                    } else {
+                                      e.target.src = 'https://via.placeholder.com/150'
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div className="order-info">
+                                <h3 className="order-title">Order #{order.id}</h3>
+                                <p className="order-date">
+                                  Placed on {formatDate(order.created_at)}
+                                </p>
+                                <p className={`order-status ${getStatusClass(order.status)}`}>
+                                  {order.status || 'Pending'}
+                                </p>
+                                <p style={{ fontSize: '14px', fontWeight: '600', marginTop: '8px', color: '#111827' }}>
+                                  ${Number(order.total_price || 0).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                      <div className="order-card">
-                        <div className="order-image">
-                          <img src="https://via.placeholder.com/150" alt="Order Product" />
-                        </div>
-                        <div className="order-info">
-                          <h3 className="order-title">Order #12346</h3>
-                          <p className="order-date">Placed on Jan 10, 2024</p>
-                          <p className="order-status">Shipped</p>
-                        </div>
-                      </div>
-                      <div className="order-card">
-                        <div className="order-image">
-                          <img src="https://via.placeholder.com/150" alt="Order Product" />
-                        </div>
-                        <div className="order-info">
-                          <h3 className="order-title">Order #12347</h3>
-                          <p className="order-date">Placed on Jan 5, 2024</p>
-                          <p className="order-status">Processing</p>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}

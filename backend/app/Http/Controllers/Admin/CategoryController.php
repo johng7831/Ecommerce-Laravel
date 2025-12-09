@@ -13,11 +13,27 @@ class CategoryController extends Controller
     // Return all categories
     public function index()
     {
-        $categories = Category::orderBy('created_at', 'DESC')->get();
-        return response()->json([
-            'status' => 200,
-            'data'   => $categories
-        ]);
+        try {
+            // Check if this is a public request (no auth) - return only active categories
+            // If authenticated admin request, return all categories
+            if (auth()->check() && auth()->user()->role === 'admin') {
+                $categories = Category::orderBy('created_at', 'DESC')->get();
+            } else {
+                $categories = Category::where('status', 1)->orderBy('created_at', 'DESC')->get();
+            }
+            
+            return response()->json([
+                'status' => 200,
+                'data'   => $categories,
+                'count'  => $categories->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error fetching categories: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
 
 

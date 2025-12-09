@@ -13,12 +13,27 @@ class BrandController extends Controller
     // Return all brands
     public function index()
     {
-        $brands = Brand::orderBy('created_at', 'DESC')->get();
+        try {
+            // Check if this is a public request (no auth) - return only active brands
+            // If authenticated admin request, return all brands
+            if (auth()->check() && auth()->user()->role === 'admin') {
+                $brands = Brand::orderBy('created_at', 'DESC')->get();
+            } else {
+                $brands = Brand::where('status', 1)->orderBy('created_at', 'DESC')->get();
+            }
 
-        return response()->json([
-            'status' => 200,
-            'data'   => $brands
-        ]);
+            return response()->json([
+                'status' => 200,
+                'data'   => $brands,
+                'count'  => $brands->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error fetching brands: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
 
     // Store a new brand

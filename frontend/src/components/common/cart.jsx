@@ -50,7 +50,13 @@ const Cart = () => {
               {cartItems.map((item) => (
                 <div key={item.id} className="cart-item">
                   <div className="cart-item-image">
-                    <img src={item.image} alt={item.title} />
+                    <img 
+                      src={item.image || 'https://via.placeholder.com/300x400?text=No+Image'} 
+                      alt={item.title || 'Product'} 
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/300x400?text=No+Image'
+                      }}
+                    />
                   </div>
                   <div className="cart-item-details">
                     <h3 className="cart-item-title">{item.title}</h3>

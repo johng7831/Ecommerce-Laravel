@@ -223,7 +223,13 @@ const Checkout = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className="checkout-product-item">
                     <div className="checkout-product-image">
-                      <img src={item.image} alt={item.title} />
+                      <img 
+                        src={item.image || 'https://via.placeholder.com/300x400?text=No+Image'} 
+                        alt={item.title || 'Product'} 
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/300x400?text=No+Image'
+                        }}
+                      />
                     </div>
                     <div className="checkout-product-details">
                       <h3 className="checkout-product-title">{item.title}</h3>
